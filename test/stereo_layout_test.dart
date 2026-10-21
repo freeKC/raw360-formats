@@ -1,0 +1,110 @@
+import 'package:raw360_formats/raw360_formats.dart';
+import 'package:test/test.dart';
+
+void main() {
+  group('guessStereoLayout', () {
+    test('a square frame holds two 2:1 eyes, one above the other', () {
+      expect(guessStereoLayout(width: 5760, height: 5760), StereoLayout.topBottom);
+      expect(guessStereoLayout(width: 4096, height: 4096), StereoLayout.topBottom);
+      // Within 10% of square
+      expect(guessStereoLayout(width: 3840, height: 3500), StereoLayout.topBottom);
+      expect(guessStereoLayout(width: 3500, height: 3840), StereoLayout.topBottom);
+    });
+
+    test('a 4:1 frame holds two 2:1 eyes side by side', () {
+      expect(guessStereoLayout(width: 7680, height: 1920), StereoLayout.leftRight);
+      expect(guessStereoLayout(width: 8192, height: 2048), StereoLayout.leftRight);
+      // Within 10% of 4:1
+      expect(guessStereoLayout(width: 7400, height: 2000), StereoLayout.leftRight);
+      expect(guessStereoLayout(width: 8600, height: 2000), StereoLayout.leftRight);
+    });
+
+    test('a regular 2:1 panorama is mono', () {
+      expect(guessStereoLayout(width: 5760, height: 2880), StereoLayout.mono);
+      expect(guessStereoLayout(width: 11968, height: 5984), StereoLayout.mono);
+    });
+
+    test('other aspect ratios are mono', () {
+      for (final (width, height) in [(3000, 2000), (2000, 3000), (8000, 1000), (4500, 4000), (3200, 1000)]) {
+        expect(
+          guessStereoLayout(width: width, height: height),
+          StereoLayout.mono,
+          reason: '$width x $height',
+        );
+      }
+    });
+
+    test('unknown or empty dimensions are mono', () {
+      expect(guessStereoLayout(width: null, height: null), StereoLayout.mono);
+      expect(guessStereoLayout(width: 4096, height: null), StereoLayout.mono);
+      expect(guessStereoLayout(width: null, height: 4096), StereoLayout.mono);
+      expect(guessStereoLayout(width: 0, height: 0), StereoLayout.mono);
+      expect(guessStereoLayout(width: 4096, height: 0), StereoLayout.mono);
+    });
+
+    test('a partial panorama is mono, whatever its aspect ratio', () {
+      expect(guessStereoLayout(width: 4096, height: 4096, hasGPanoCrop: true), StereoLayout.mono);
+      expect(guessStereoLayout(width: 7680, height: 1920, hasGPanoCrop: true), StereoLayout.mono);
+    });
+
+    test('a half sphere (VR180) has square eyes: side by side in a 2:1 frame, stacked in a 1:2 frame', () {
+      const half = SphereCoverage.half;
+      for (final (width, height, expected) in [
+        (5760, 2880, StereoLayout.leftRight),
+        (8192, 4096, StereoLayout.leftRight),
+        // Within 10% of 2:1
+        (7600, 4096, StereoLayout.leftRight),
+        (2880, 5760, StereoLayout.topBottom),
+        (4096, 4096, StereoLayout.mono),
+        (7680, 1920, StereoLayout.mono),
+        (3000, 2000, StereoLayout.mono),
+      ]) {
+        expect(
+          guessStereoLayout(width: width, height: height, coverage: half),
+          expected,
+          reason: '$width x $height',
+        );
+      }
+      expect(guessStereoLayout(width: 5760, height: 2880, hasGPanoCrop: true, coverage: half), StereoLayout.mono);
+      expect(guessStereoLayout(width: null, height: null, coverage: half), StereoLayout.mono);
+    });
+  });
+
+  group('isPartialSphere', () {
+    test('a crop covering the whole sphere, within rounding, is no partial panorama', () {
+      expect(isPartialSphere(const NormalizedRect.fromLTWH(0, 0, 1, 1)), isFalse);
+      expect(isPartialSphere(const NormalizedRect.fromLTWH(0, 0, 4095 / 4096, 2047 / 2048)), isFalse);
+    });
+
+    test('a crop leaving part of the sphere out is a partial panorama', () {
+      expect(isPartialSphere(const NormalizedRect.fromLTWH(0, 2035 / 4601, 4460 / 9202, 1667 / 4601)), isTrue);
+      expect(isPartialSphere(const NormalizedRect.fromLTWH(0.25, 0, 0.5, 1)), isTrue);
+      expect(isPartialSphere(const NormalizedRect.fromLTWH(0, 0.1, 1, 0.8)), isTrue);
+    });
+  });
+
+  group('StereoLayout', () {
+    test('the left eye is the top half, the left half, or the whole frame', () {
+      expect(StereoLayout.topBottom.leftEyeRect, const NormalizedRect.fromLTWH(0, 0, 1, 0.5));
+      expect(StereoLayout.leftRight.leftEyeRect, const NormalizedRect.fromLTWH(0, 0, 0.5, 1));
+      expect(StereoLayout.mono.leftEyeRect, const NormalizedRect.fromLTWH(0, 0, 1, 1));
+    });
+
+    test('the left eye of a 3D panorama is a 2:1 equirectangular image', () {
+      for (final (layout, width, height) in [
+        (StereoLayout.topBottom, 5760.0, 5760.0),
+        (StereoLayout.leftRight, 7680.0, 1920.0),
+        (StereoLayout.mono, 5760.0, 2880.0),
+      ]) {
+        final eye = layout.leftEyeRect;
+        expect(width * eye.width / (height * eye.height), 2, reason: '$layout');
+      }
+    });
+
+    test('next goes through mono, top and bottom, side by side, and back', () {
+      expect(StereoLayout.mono.next, StereoLayout.topBottom);
+      expect(StereoLayout.topBottom.next, StereoLayout.leftRight);
+      expect(StereoLayout.leftRight.next, StereoLayout.mono);
+    });
+  });
+}
