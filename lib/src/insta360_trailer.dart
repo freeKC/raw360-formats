@@ -7,13 +7,13 @@
 // read: such a file is taken as a flat picture.
 //
 // Two layouts of the records exist. On the X3 and older cameras they are walked backwards from the tail, the metadata
-// record last, so the calibration sits in the last 2 KB of the file. From the X4 on (verified on X5 files by GyroView,
+// record last, so the calibration sits in the last 2 KB of the file. From the X4 on (seen on X4 and X5 files,
 // documented by insta360-rs as "indexed records") the record before the tail is a directory, id 0 and format 0, of 10
 // byte entries that give the place of every record: the records are padded to 128 KiB boundaries and cannot be walked
 // backwards. The trailer may then sit in an MP4 box of type inst, whose 8 byte header the trailer size leaves out.
 //
 // The field numbers are those of telemetry-parser (MIT/Apache-2.0), checked on X3 files, and of insta360-rs and
-// GyroView for the fields of the newer cameras (26, 79, 80, 129, 131), which no file at hand has; see docs/insta360.md.
+// GyroView for the fields of the newer cameras (26, 79, 80, 129, 131), seen on X4 and X5 files; see docs/insta360.md.
 //
 // Pure Dart: the caller reads the bytes, from a file, from memory or with HTTP range requests.
 
@@ -184,14 +184,15 @@ class Insta360Trailer {
   /// How the camera stored the video (field 79): 0 unknown, 1 one file per lens, 2 one track per lens
   final int? fileLayout;
 
-  /// Which lens the first video track holds (field 80): 0 unknown, 1 the track of stream 10 (lens 1), 2 the one of
-  /// stream 00 (lens 0); see [insta360TrackOrder]
+  /// Which lens the first video track holds (field 80): 0 unknown, 1 lens 1, the second lens of the calibration
+  /// strings (stream 10), 2 lens 0, the first (stream 00). 1 on the X4 and X5 files seen; see [insta360TrackOrder]
   final int? trackOrder;
 
   /// What the picture is (field 129): 2 a double fisheye, 6 an equirect the camera stitched itself
   final int? imageCategory;
 
-  /// How the lenses are laid out (field 131): 1 one stream, 2 separate files, 3 two tracks, 4 two tracks reversed
+  /// How the lenses are laid out (field 131): 1 one stream, 2 separate files, 3 two tracks, 4 two tracks with lens 1 in
+  /// track 0 (seen with field 80 = 1 on X5 files)
   final int? streamLayout;
 
   /// Whether the records were found through the directory of an indexed trailer (X4 and later) rather than walked
@@ -209,8 +210,9 @@ class Insta360Trailer {
 }
 
 /// The lens that video track 0 of a two-track Insta360 file holds, and what said so: field 80 of [trailer] (1: lens 1,
-/// 2: lens 0), else field 131 (4: lens 1, 3: lens 0), else lens 0. Field 80 was 1 on two real X4 files whose track 0
-/// held lens 1; field 131 is not checked on a real file (GyroView marks it provisional), hence the source.
+/// 2: lens 0), else field 131 (4: lens 1, 3: lens 0), else lens 0. Lens 0 is the first lens of the calibration
+/// strings. Two X4 files carried field 80 = 1 and two X5 units field 80 = 1 with field 131 = 4; on all of them track 0
+/// held lens 1, checked at the seam (docs/insta360.md). Field 80 = 2 and field 131 = 3 were not seen.
 ({int lensOfTrack0, String source}) insta360TrackOrder(Insta360Trailer? trailer) {
   switch (trailer?.trackOrder) {
     case 1:

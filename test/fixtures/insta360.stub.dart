@@ -134,15 +134,15 @@ List<int> x3Metadata({
   ...pbVarintField(68, 0),
 ];
 
-/// The metadata record of an X4 or X5 (synthetic: no such file at hand): the camera, the recording a file belongs to
-/// (field 26), how the video is stored (fields 79, 80, 131), what the picture is (field 129), and a V6 calibration
-/// string. A null field is left out.
+/// The metadata record of an X5 video (synthetic, with the values of fields 79, 80, 129 and 131 that real X5 files
+/// carry): the camera, the recording a file belongs to (field 26), how the video is stored (fields 79, 80, 131), what
+/// the picture is (field 129), and a V6 calibration string. A null field is left out.
 List<int> x5Metadata({
   String? offsetV6,
   int? fileLayout = 2,
   int? trackOrder = 1,
   int? imageCategory = 2,
-  int? streamLayout = 3,
+  int? streamLayout = 4,
   String? groupIdentity = x5GroupIdentity,
   int groupIndex = 0,
 }) => [

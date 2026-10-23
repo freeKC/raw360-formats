@@ -34,9 +34,10 @@ that reads them.
 | [docs/stereo-and-coverage.md](docs/stereo-and-coverage.md) | Guessing the stereo layout and the half sphere |
 | [docs/stitching-math.md](docs/stitching-math.md) | Frames, lens models, poses, blending |
 
-What was checked on real files: Insta360 X3 photos, proxies and a split pair, two Insta360 X4 two track files, a GoPro
-MAX `.360`, a DJI Osmo 360 `.osv`, and a public sample of an Apple spatial photo. What was not: Insta360 X4 Air, X5 and X6, GoPro MAX 2,
-other DJI models and recording modes. Each page says which statement rests on what. Reports from other cameras and
+What was checked on real files: Insta360 X3 photos, proxies and a split pair, Insta360 X4 and X5 two track files and
+their proxies (the X5 for the trailer and the lens order), a GoPro MAX `.360`, a DJI Osmo 360 `.osv`, and a public
+sample of an Apple spatial photo. What was not: Insta360 X4 Air and X6, GoPro MAX 2, other DJI models and recording
+modes. Each page says which statement rests on what. Reports from other cameras and
 firmware are welcome as issues, with the metadata only (the output of the commands of the page) rather than the file.
 
 ## Use the package

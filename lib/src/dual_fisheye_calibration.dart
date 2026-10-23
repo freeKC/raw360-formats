@@ -116,10 +116,10 @@ class Insta360LayoutHints {
   /// Field 79: 0 unknown, 1 one file per lens, 2 one track per lens
   final int? fileLayout;
 
-  /// Field 80: 0 unknown, 1 track 0 holds lens 1, 2 track 0 holds lens 0
+  /// Field 80: 0 unknown, 1 track 0 holds lens 1 (the second lens of the calibration strings), 2 track 0 holds lens 0
   final int? trackOrder;
 
-  /// Field 131: 1 one stream, 2 separate files, 3 two tracks, 4 two tracks reversed
+  /// Field 131: 1 one stream, 2 separate files, 3 two tracks, 4 two tracks with lens 1 in track 0
   final int? streamLayout;
 
   /// Field 129: 2 a double fisheye, 6 an equirect stitched in the camera
@@ -128,8 +128,8 @@ class Insta360LayoutHints {
   /// Field 26.3: the recording the file belongs to, the same in both files of a split pair
   final String? groupIdentity;
 
-  /// Field 27: the window of the sensor the video frames show, smaller than the canvas square on the X3 and the X4
-  /// null when the trailer does not give it
+  /// Field 27: the window of the sensor the video frames show, smaller than the canvas square on the X3, the X4 and
+  /// the X5; null when the trailer does not give it
   final Insta360VideoWindow? videoWindow;
 
   @override

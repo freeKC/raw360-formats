@@ -291,7 +291,7 @@ void main() {
       expect(trailer.fileLayout, 2);
       expect(trailer.trackOrder, 1);
       expect(trailer.imageCategory, 2);
-      expect(trailer.streamLayout, 3);
+      expect(trailer.streamLayout, 4);
 
       final wrongTypes = await _trailer(
         insta360File([
@@ -334,7 +334,9 @@ void main() {
   group('insta360TrackOrder', () {
     test('takes field 80, else field 131, else lens 0', () {
       for (final (trackOrder, streamLayout, expected) in [
+        // As on X4 files, then on X5 files
         (1, null, (lensOfTrack0: 1, source: 'field80')),
+        (1, 4, (lensOfTrack0: 1, source: 'field80')),
         (2, 4, (lensOfTrack0: 0, source: 'field80')),
         (0, 4, (lensOfTrack0: 1, source: 'field131')),
         (null, 3, (lensOfTrack0: 0, source: 'field131')),

@@ -29,7 +29,8 @@ and compare with the pattern (test/raw_stitch_test.dart).
   forward = normalize(axis of lens 1 minus its component along down), right = down cross forward.
 - `lensPose(lens, i) = Rz(mirroredRoll(roll)) Rx(180° i) Rx(pitch) Ry(yaw)`, with
   `mirroredRoll(r) = 2 round(r/90) 90 minus r`: the strings give the roll mirrored about the nearest quarter turn, as
-  GyroView measured against Insta360 Studio on the X3, X5 and X6.
+  GyroView measured against Insta360 Studio on the X3, X5 and X6; the seam of X3, X4 and X5 files agrees
+  (docs/insta360.md).
 - `viewToLens_i = lensPose(lens_i, i) bodyFrame(down)`.
 
 DJI lenses carry their rotation whole (`DualFisheyeLens.viewToLens`, docs/dji-osv.md); GoPro tracks use
@@ -59,7 +60,8 @@ closer to its axis is taken alone. GoPro split faces blend their two halves line
 `FisheyePairSampler` reads each lens from a region of a texture:
 
 - one side by side frame (Insta360 X3 and older): lens 0 in the left half, lens 1 in the right half of texture 0;
-- two tracks or two files (Insta360 X4 and later, split pairs, DJI): lens i fills texture `textureOfLens[i]`.
+- two tracks or two files (Insta360 X4 and later, split pairs, DJI): lens i fills texture `textureOfLens[i]`. On the
+  Insta360 X4 and X5, track 0 holds lens 1 (`insta360TrackOrder`).
 
 The whole calibration square of a lens maps onto its whole region; samples are kept half a pixel inside the region so
 that bilinear sampling never reads the other lens.
