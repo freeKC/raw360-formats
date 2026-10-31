@@ -206,6 +206,20 @@ clip prefers A (16.41 against 16.91), but two X3 references then pick the wrong 
 22.29, proxy 19.76 against 19.43). A stitcher that fits its scale per file, or reads the roll another way, can thus see
 a small margin the other way round.
 
+### Confirmed on a library of 44 X5 clips
+
+Checked again by golblick (AkshayRao27) on 31 October 2026 on the 44 X5 videos of one library, firmware 1.7.43 to
+1.11.10 ([pulsejet/memories#1739](https://github.com/pulsejet/memories/issues/1739#issuecomment-6546198600),
+[golblick's format notes](https://github.com/AkshayRao27/golblick/blob/main/docs/formats/insta360-agent-notes.md#which-track-holds-which-lens-x5-video),
+commit [2330a4f](https://github.com/AkshayRao27/golblick/commit/2330a4f)): field 80 = 1 and field 131 = 4 on all 44;
+on the 32 proxies still beside their video, the left half matches track 1 and the right half track 0 (grey correlation
+0.987 to 1.000, the crossed pairs at most 0.86); the fit of either pairing to the camera's own stitch of the opening
+frame cannot tell them apart (the file's pairing scores better on 26 of 44 clips, the first six all favoured it), as
+the paragraph above expects for a stitcher that fits its scale per file. The swap had shown in golblick as two half
+turns, a separate inertial axis map for videos and a video opening the other way round from the photos; both went
+away with the tracks paired by field 80, and one axis map now serves the X5's photos and videos. No two track file
+has yet shown field 80 with a value other than 1.
+
 ### Lens guards and the radial scale
 
 Found by golblick (AkshayRao27) and reported in
